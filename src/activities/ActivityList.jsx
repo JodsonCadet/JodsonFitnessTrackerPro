@@ -13,28 +13,20 @@ export default function ActivityList() {
 
   const navigate = useNavigate();
 
-  if (loading || !activities) return <p>Loading...</p>;
+  if (loading || !activities) return <p>it's Loading...</p>;
   if (error) return <p>Sorry! {error}</p>;
 
-  // const loadActivitiesDetails = (e) => {
-  //   const activityId = e.target.closest("li").dataset.id;
-  //   // Load activity details...
-  // };
-  // Using the navigate function to load activity details. Still working it!!!
-const loadActivitiesDetails = ({activity}) => {
-  navigate(`/activities/${activity.id}`);
-}
   return (
-    <ul onClick={loadActivitiesDetails}>
+    <ul>
       {activities.map((activity) => (
-        <ActivityListItem key={activity.id} activity={activity} />
+        <ActivityListItem key={activity.id} activity={activity} navigate={navigate} />
       ))}
     </ul>
   );
 }
 
 /** Shows a single activity. Logged-in users will also see a delete button. */
-function ActivityListItem({ activity }) {
+function ActivityListItem({ activity, navigate }) {
   const { token } = useAuth();
   const {
     mutate: deleteActivity,
@@ -42,11 +34,19 @@ function ActivityListItem({ activity }) {
     error,
   } = useMutation("DELETE", "/activities/" + activity.id, ["activities"]);
 
+  // Using the navigate function to load activity details. Still working it!!!
+  const loadActivitiesDetails = () => {
+    navigate(`/activities/${activity.id}`);
+  }
+
   return (
-    <li>
+    <li onClick={loadActivitiesDetails}>
       <p>{activity.name}</p>
       {token && (
-        <button onClick={() => deleteActivity()}>
+        <button onClick={(e) => {
+          e.stopPropagation();
+          deleteActivity();
+        }}>
           {loading ? "Deleting" : error ? error : "Delete"}
         </button>
       )}
